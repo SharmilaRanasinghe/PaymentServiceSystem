@@ -21,7 +21,7 @@ public class ApiResponse<T> {
     @Schema(description = "Indicates if the request was successful", example = "true")
     private boolean success;
     
-    @Schema(description = "Response message", example = "Merchant created successfully")
+    @Schema(description = "Response message", example = "Executed successfully")
     private String message;
     
     @Schema(description = "Response data payload")

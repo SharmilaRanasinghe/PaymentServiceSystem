@@ -16,8 +16,7 @@ import java.time.Instant;
 import java.util.UUID;
 // domain/model/Merchant.java
 @Entity
-@Table(name = "merchants", 
-       uniqueConstraints = @UniqueConstraint(columnNames = "email"))
+@Table(name = "merchants")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @Builder
@@ -26,7 +25,11 @@ import java.util.UUID;
 public class Merchant {
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
+    @Column(columnDefinition = "UUID DEFAULT uuid_generate_v4()")
     private UUID id;
     
     @NotBlank
@@ -43,9 +46,10 @@ public class Merchant {
     private MerchantStatus status = MerchantStatus.PENDING;
     
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(name = "updated_at")
     @LastModifiedDate
     private Instant updatedAt;
     

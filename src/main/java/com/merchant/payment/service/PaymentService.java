@@ -2,17 +2,25 @@ package com.merchant.payment.service;
 
 import com.merchant.payment.domain.Merchant;
 import com.merchant.payment.domain.PaymentStatus;
+import com.merchant.payment.domain.PaymentStatusChangedEvent;
 import com.merchant.payment.domain.PaymentTransaction;
 import com.merchant.payment.dto.CreatePaymentRequest;
 import com.merchant.payment.dto.PaymentResponse;
+import com.merchant.payment.dto.UpdatePaymentStatusRequest;
 import com.merchant.payment.exception.BusinessException;
 import com.merchant.payment.exception.ResourceNotFoundException;
 import com.merchant.payment.repository.MerchantRepository;
 import com.merchant.payment.repository.PaymentRepository;
+import com.merchant.payment.repository.PaymentSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 
@@ -50,7 +58,7 @@ public class PaymentService {
             .amount(request.getAmount())
             .currency(request.getCurrency().toUpperCase())
             .paymentMethod(request.getPaymentMethod())
-            .status(PaymentStatus.INITIATED)
+            .status(PaymentStatus.INIT)
             .build();
 
         payment = paymentRepository.save(payment);
@@ -59,37 +67,37 @@ public class PaymentService {
         return PaymentResponse.fromEntity(payment);
     }
 
-//    @Transactional(isolation = Isolation.REPEATABLE_READ)
-//    public PaymentResponse updatePaymentStatus(UUID paymentId,
-//                                               UpdatePaymentStatusRequest request) {
-//        log.info("Updating payment {} status to {}", paymentId, request.getStatus());
-//
-//        PaymentTransaction payment = paymentRepository.findByIdForUpdate(paymentId)
-//            .orElseThrow(() -> new ResourceNotFoundException(
-//                "PAYMENT_NOT_FOUND",
-//                String.format("Payment with id %s not found", paymentId)));
-//
-//        payment.updateStatus(request.getStatus());
-//        payment = paymentRepository.save(payment);
-//
-//        eventPublisher.publishEvent(
-//            new PaymentStatusChangedEvent(this, payment, request.getStatus()));
-//
-//        log.info("Payment {} status updated to {}", paymentId, request.getStatus());
-//        return PaymentResponse.fromEntity(payment);
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public Page<PaymentResponse> listPayments(UUID merchantId,
-//                                             PaymentStatus status,
-//                                             int page,
-//                                             int size) {
-//        Specification<PaymentTransaction> spec = PaymentSpecification
-//            .filterPayments(merchantId, status);
-//
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-//
-//        return paymentRepository.findAll(spec, pageable)
-//            .map(PaymentResponse::fromEntity);
-//    }
+    @Transactional()
+    public PaymentResponse updatePaymentStatus(UUID paymentId,
+                                               UpdatePaymentStatusRequest request) {
+        log.info("Updating payment {} status to {}", paymentId, request.getStatus());
+
+        PaymentTransaction payment = paymentRepository.findById(paymentId)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "PAYMENT_NOT_FOUND",
+                String.format("Payment with id %s not found", paymentId)));
+
+        payment.updateStatus(request.getStatus());
+        payment = paymentRepository.save(payment);
+
+        eventPublisher.publishEvent(
+            new PaymentStatusChangedEvent(this, payment, request.getStatus()));
+
+        log.info("Payment {} status updated to {}", paymentId, request.getStatus());
+        return PaymentResponse.fromEntity(payment);
+    }
+
+    @Transactional()
+    public Page<PaymentResponse> listPayments(UUID merchantId,
+                                              PaymentStatus status,
+                                              int page,
+                                              int size) {
+        Specification<PaymentTransaction> spec = PaymentSpecification
+            .filterPayments(merchantId, status);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return paymentRepository.findAll(spec, pageable)
+            .map(PaymentResponse::fromEntity);
+    }
 }

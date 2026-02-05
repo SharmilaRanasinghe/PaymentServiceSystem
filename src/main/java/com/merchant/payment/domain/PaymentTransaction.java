@@ -50,7 +50,7 @@ public class PaymentTransaction {
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status = PaymentStatus.INITIATED;
+    private PaymentStatus status = PaymentStatus.INIT;
     
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -67,7 +67,7 @@ public class PaymentTransaction {
     
     private void validateStatusTransition(PaymentStatus newStatus) {
         Map<PaymentStatus, Set<PaymentStatus>> allowedTransitions = Map.of(
-            PaymentStatus.INITIATED, Set.of(PaymentStatus.AUTHORIZED, PaymentStatus.FAILED),
+            PaymentStatus.INIT, Set.of(PaymentStatus.AUTHORIZED, PaymentStatus.FAILED),
             PaymentStatus.AUTHORIZED, Set.of(PaymentStatus.SETTLED, PaymentStatus.FAILED),
             PaymentStatus.SETTLED, Set.of(),
             PaymentStatus.FAILED, Set.of()

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.merchant.payment.dto.MerchantResponse;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/merchants")
 @RequiredArgsConstructor
@@ -26,4 +28,13 @@ public class MerchantController {
                 .body(ApiResponse.success(merchantResponse, "Merchant created successfully"));
     }
 
+    @PutMapping("/{merchantId}/activate")
+    public ResponseEntity<ApiResponse<MerchantResponse>> activateMerchant(@PathVariable UUID merchantId) {
+        log.info("PUT /api/v1/merchants/{}/activate", merchantId);
+
+        MerchantResponse response = merchantService.activateMerchant(merchantId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(response, "Merchant activated successfully"));
+    }
 }

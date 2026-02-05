@@ -2,7 +2,7 @@ package com.merchant.payment.domain;
 
 // domain/model/PaymentStatus.java
 public enum PaymentStatus {
-    INITIATED,
+    INIT,
     AUTHORIZED,
     SETTLED,
     FAILED

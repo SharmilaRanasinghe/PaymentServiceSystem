@@ -1,0 +1,19 @@
+# .dockerignore
+.git
+.gitignore
+*.iml
+*.ipr
+*.iws
+.idea/
+target/
+logs/
+*.log
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.class
+.DS_Store
+Thumbs.db
